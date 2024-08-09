@@ -1,15 +1,11 @@
-from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from fastapi import FastAPI, HTTPException
 import base64
 from PIL import Image
 import io
 import numpy as np
 from mtcnn import MTCNN
 import uvicorn
-import torch
-from torchvision import transforms
-from stylegan2_pytorch import ModelLoader
-
 
 app = FastAPI()
 
@@ -20,7 +16,6 @@ class ImageRequest(BaseModel):
 
 
 detector_mtcnn = MTCNN()
-stylegan_model = ModelLoader(name='ffhq', base_dir='Desktop/Workspace/wowoo')
 
 
 def decode_image(base64_str):
@@ -45,24 +40,7 @@ def detect_face_mtcnn(image):
 
 
 def apply_stylegan_aging(face_image, age_factors):
-    transform = transforms.Compose([
-        transforms.Resize((256, 256)),
-        transforms.ToTensor(),
-        transforms.Normalize([0.5] * 3, [0.5] * 3)
-    ])
-
-    face_tensor = transform(face_image).unsqueeze(0)
-
-    aged_images = []
-    for age in age_factors:
-        with torch.no_grad():
-            noise = torch.randn(1, 512).cuda()  # Example noise vector for StyleGAN2
-            style_vector = stylegan_model.noise_to_styles(noise, trunc_psi=0.7)
-            aged_image_tensor = stylegan_model.styles_to_images(style_vector)
-            aged_image = transforms.ToPILImage()(aged_image_tensor.squeeze(0).cpu())
-            aged_images.append(aged_image)
-
-    return aged_images
+    pass
 
 
 @app.post("/age-image")
